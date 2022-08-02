@@ -12,6 +12,8 @@ namespace bs.Auth.Interfaces.ViewModels
         string Username { get; set; }
         string Token { get; set; }
         DateTime TokenExpireAt { get; set; }
+        string[] Roles{ get; set; }
+
 
     }
 }
