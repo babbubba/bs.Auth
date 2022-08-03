@@ -1,7 +1,11 @@
 using bs.Auth.Api.AuthMock;
+using bs.Auth.Api.Repositories;
 using bs.Auth.Interfaces.Models;
 using bs.Auth.Interfaces.Services;
 using bs.Auth.Models;
+using bs.Data;
+using bs.Data.Interfaces;
+using bs.Datatable.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -22,20 +26,40 @@ builder.Services.AddCors(options =>
                       });
 });
 
-// Add services to the container.
-
-
 // First set security model
 var security = new AppSecuritySettingsModel
 {
+    JwtRefreshTokenValidityDays= 1,
     JwtTokenValidityMinutes = 60,
-    Secret = "123456789012345678901234567890123456",
+    Secret = "chiave-segreta-da-cambiare-in-produzione",
     ValidateAudience = false,
-    ValidateIssuer = false
+    ValidateIssuer = false,
+    ValidAudience = "dummy-audience",
+    ValidIssuer = "dummy-issuer"
 };
 
 builder.Services.AddSingleton<IAppSecuritySettingsModel>(security);
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<CustomersRepository>();
+builder.Services.AddScoped<PaginatorService>();
+
+
+IDbContext dbContext = new DbContext
+{
+    ConnectionString = "Data Source=.\\Data.db;Version=3;BinaryGuid=False;",
+    DatabaseEngineType = DbType.SQLite,
+    Create = false,
+    Update = true,
+    LookForEntitiesDllInCurrentDirectoryToo = false,
+    SetBatchSize = 25
+};
+
+// Register the O.R.M. and related models mapping
+builder.Services.AddBsData(dbContext);
+
+builder.Services.AddSingleton(dbContext);
+
+
 
 // Setting authentication using JWT Token in request header
 builder.Services.AddAuthentication(options =>
@@ -75,6 +99,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 app.UseCors(corsProfile);
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 

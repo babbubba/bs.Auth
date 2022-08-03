@@ -1,9 +1,12 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace bs.Auth.Api.Controllers
 {
+    [Authorize]
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class WeatherForecastController : ControllerBase
     {
         private static readonly string[] Summaries = new[]
@@ -19,9 +22,14 @@ namespace bs.Auth.Api.Controllers
         }
 
         [HttpGet(Name = "GetWeatherForecast")]
+        
         public IEnumerable<WeatherForecast> Get()
         {
-            return Enumerable.Range(1, 5).Select(index => new WeatherForecast
+            if (User?.Identity != null && User.Identity.IsAuthenticated)
+            {
+                var userName = User.FindFirst(ClaimTypes.NameIdentifier).Value;
+            }
+                return Enumerable.Range(1, 5).Select(index => new WeatherForecast
             {
                 Date = DateTime.Now.AddDays(index),
                 TemperatureC = Random.Shared.Next(-20, 55),

@@ -21,9 +21,21 @@ namespace bs.Auth.Api.Controllers
         [HttpPost("Authenticate")]
         public async Task<IActionResult> Authenticate(UserAuthDto userAuth)
         {
-            var result = await authService.AuthenticateAsync<int>(userAuth);
+            try
+            {
+                var result = await authService.AuthenticateAsync<int>(userAuth);
+                return Ok(new Response<IUserViewModel<int>>(result));
 
-            return Ok(new Response<IUserViewModel<int>>(result));
+            }
+            catch (Exception ex)
+            {
+                return Ok(new Response<string>("")
+                {
+                     Success = false,
+                     ErrorMessage = ex.Message
+                });
+            }
+
 
         }
     }
