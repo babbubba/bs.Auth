@@ -8,5 +8,6 @@ namespace bs.Datatable.Interfaces
         int Draw { get; set; }
         int Length { get; set; }
         int Start { get; set; }
+        Order[] Order { get; set; }
     }
 }

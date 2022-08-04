@@ -1,4 +1,5 @@
-﻿using bs.Datatable.Interfaces;
+﻿using bs.Datatable.Extensions;
+using bs.Datatable.Interfaces;
 using bs.Datatable.ViewModels;
 using NHibernate;
 using NHibernate.Criterion;
@@ -13,7 +14,18 @@ namespace bs.Datatable.Services
     {
         public IPageResponse<T> GetPage<T>(IPageRequest pageReques, IQueryable<T> source)
         {
+            if(pageReques.Order != null && pageReques.Order.Count()>0)
+            {
+                var columnPropertyName = pageReques.Columns[pageReques.Order[0].Column].Name;
+                var orderDescending = pageReques.Order[0].Dir.ToLower() == "asc" ? false : true;
+                source = source.DynamicOrderBy(columnPropertyName, orderDescending);
+
+            }
+
             var data = source.Skip(pageReques.Start).Take(pageReques.Length).ToArray();
+
+
+            
 
             return new PageResponse<T>
             {
